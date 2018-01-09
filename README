@@ -1,0 +1,8 @@
+Local development:
+
+Need local Dynamo installed
+    - As part of Dynamo, need Java JDK 9 installed.
+
+Environment Variables that need to be defined:
+    - AWS_REGION
+    - 
