@@ -21,7 +21,7 @@ type ConversationTreeNode struct {
 	IsRootNode           bool        `dynamo:"IsRootNode"`
 	ParentNodeResponse   interface{} `dynamo:"ParentNodeResponse"`
 
-	// We can store a struct that will contain the name of the type that contains the function and the name of function itself in strings
+	// We can store a struct that will contain the name of the type that contains the function and the name of function itself in strings.
 	// We then need another function that has a default variable of all necessary types and depending on the type uses that default variable and reflection below to call the method. All methods should return bool
 	// See the following example:
 	//
