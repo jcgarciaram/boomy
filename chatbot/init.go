@@ -47,12 +47,12 @@ func InitializeConv(dynamoInitChan chan struct{}) chan struct{} {
 		}
 
 		// BuildQuickReply map
-		qrs.buildMap()
+		// qrs.buildMap()
 
 		// fmt.Println("Number of quick replies: ", len(quickReplyMap), len(qrs))
 		// fmt.Println(qrs)
 
-		BuildConversationTrees(ctns)
+		BuildConversationTreesFromNodes(ctns, qrs)
 
 		convInitChan <- struct{}{}
 	}()

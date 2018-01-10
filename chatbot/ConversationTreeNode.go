@@ -3,6 +3,7 @@ package chatbot
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/jcgarciaram/demoPark/dynahelpers"
 	"github.com/jcgarciaram/demoPark/utils"
@@ -165,6 +166,16 @@ func (o *ConversationTreeNode) ValidateQuickReplyResponse(r string, qr *QuickRep
 	}
 
 	return fmt.Errorf("response does not match any of the quick reply responses")
+
+}
+
+// ResponseHandler handles the reponse received using the method defined in validateResponseMethod
+func (o *ConversationTreeNode) ResponseHandler(r string) error {
+
+	v := typeMap[o.validateResponseMethod.typeName]
+	method := o.validateResponseMethod.methodName
+
+	return v.MethodByName(method).Call([]reflect.Value{reflect.ValueOf(r)})[0].Interface().(error)
 
 }
 
