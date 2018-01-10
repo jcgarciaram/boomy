@@ -1,4 +1,4 @@
-package demoParkConversation
+package chatbot
 
 const (
 	// ExpectedReplyTypeAny refers to a reply by the user where it is something they type

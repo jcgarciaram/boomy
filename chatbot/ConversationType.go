@@ -1,4 +1,4 @@
-package demoParkConversation
+package chatbot
 
 const (
 	// ConversationTypeNewUser is a conversation with a new user. This will assist with signing up

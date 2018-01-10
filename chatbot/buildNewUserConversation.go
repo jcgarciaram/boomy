@@ -1,4 +1,4 @@
-package demoParkConversation
+package chatbot
 
 func BuildNewUserConversation() error {
 	ct := ConversationTree{

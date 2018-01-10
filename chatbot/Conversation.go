@@ -1,4 +1,4 @@
-package demoParkConversation
+package chatbot
 
 import (
 	"github.com/jcgarciaram/demoPark/dynahelpers"
