@@ -120,6 +120,8 @@ func printTree(n *ConversationTreeNode, parentChildNodeMap map[string]map[string
 
 func buildTreeFromRootNode(rootNode *ConversationTreeNode) {
 
+	convNodeMap[rootNode.GetID()] = rootNode
+
 	// Ensure we don't visit the same node twice
 	rootNode.Visited = true
 
@@ -133,16 +135,11 @@ func buildTreeFromRootNode(rootNode *ConversationTreeNode) {
 		return
 	}
 
-	// Iterate through child nodes and populate convNodeMap
-	for i, cn := range rootNode.ChildrenNodes {
-
-		convNodeMap[cn.GetID()] = rootNode.ChildrenNodes[i]
-
-		// If we haven't visited the child node, recursively call this function with it
+	// Iterate through child nodes if we haven't visited it, recursively call this function with it
+	for _, cn := range rootNode.ChildrenNodes {
 		if !cn.Visited {
 			buildTreeFromRootNode(cn)
 		}
-
 	}
 
 }

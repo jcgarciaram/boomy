@@ -1,10 +1,12 @@
-package demoParkDB
+package boomyDB
 
 import (
 	"log"
 
-	"github.com/jcgarciaram/demoPark/dynahelpers"
-	"github.com/jcgarciaram/demoPark/utils"
+	"github.com/jcgarciaram/boomy/chatbot"
+
+	"github.com/jcgarciaram/boomy/dynahelpers"
+	"github.com/jcgarciaram/boomy/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -19,8 +21,12 @@ type Resident struct {
 	Email       string `dynamo:"Email"`
 	PhoneNumber string `dynamo:"PhoneNumber"`
 
+	ValidationCode string `dynamo:"ValidationCode" json:"-"`
+
 	// Hydrate Up
 	Residence Residence `dynamo:"-" json:"-"`
+
+	Conversation chatbot.Conversation `dynamo:"Conversation" json:"-"`
 }
 
 // Residents is a slice of Resident
@@ -77,4 +83,16 @@ func (oSlice *Residents) GetAll() error {
 		*oSlice = make([]Resident, 0)
 	}
 	return nil
+}
+
+// GetConversation gets a resident's current conversation
+func (o *Resident) GetConversation(ID string) (chatbot.Conversation, error) {
+	var c chatbot.Conversation
+
+	if err := o.Get(ID); err != nil {
+		log.Println(err)
+		return c, err
+	}
+
+	return o.Conversation, nil
 }

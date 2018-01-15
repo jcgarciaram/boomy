@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"runtime"
 
-	"github.com/jcgarciaram/demoPark/dynahelpers"
-	"github.com/jcgarciaram/demoPark/utils"
+	"github.com/jcgarciaram/boomy/dynahelpers"
+	"github.com/jcgarciaram/boomy/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -28,11 +29,11 @@ type ConversationTreeNode struct {
 	//
 	// https://play.golang.org/p/no9z-0wvkmy
 	//
-	// As part of initializing the dynamoDB package, we can add all the types to a map that will contain the reflect.Type of the type. This map needs to be visible to demoParkConversation
+	// As part of initializing the dynamoDB package, we can add all the types to a map that will contain the reflect.Type of the type. This map needs to be visible to boomyConversation
 	//
 	// https://play.golang.org/p/2TugHjN1IUk
 	//
-	validateResponseMethod
+	responseHandlerMethod
 
 	// Hydrate Up
 	ConversationTree *ConversationTree `dynamo:"-"`
@@ -124,6 +125,16 @@ func (o *ConversationTreeNode) AddQuickReplies(qrs ...*QuickReply) {
 
 }
 
+// SetResponseHandlerMethod sets the responseHandlerMethod for a ConversationTreeNode
+func (o *ConversationTreeNode) SetResponseHandlerMethod(method func(interface{}, string) error) {
+
+	RegisterMethod(method)
+
+	// Reflect magic to get the function's name
+	o.responseHandlerMethod.methodName = runtime.FuncForPC(reflect.ValueOf(method).Pointer()).Name()
+
+}
+
 // ValidateResponse validates that the response is a valid response
 func (o *ConversationTreeNode) ValidateResponse(r string) (bool, string) {
 
@@ -170,12 +181,19 @@ func (o *ConversationTreeNode) ValidateQuickReplyResponse(r string, qr *QuickRep
 }
 
 // ResponseHandler handles the reponse received using the method defined in validateResponseMethod
-func (o *ConversationTreeNode) ResponseHandler(r string) error {
+func (o *ConversationTreeNode) ResponseHandler(r interface{}, s string) error {
 
-	v := typeMap[o.validateResponseMethod.typeName]
-	method := o.validateResponseMethod.methodName
+	methodName := o.responseHandlerMethod.methodName
+	methodValue := methodMap[methodName]
 
-	return v.MethodByName(method).Call([]reflect.Value{reflect.ValueOf(r)})[0].Interface().(error)
+	errInterface := methodValue.Call([]reflect.Value{reflect.ValueOf(r), reflect.ValueOf(s)})[0].Interface()
+
+	err, ok := errInterface.(error)
+	if !ok {
+		return nil
+	}
+
+	return err
 
 }
 
@@ -185,8 +203,7 @@ func (o *ConversationTreeNode) Print() {
 	fmt.Printf("\tResponse: %s\n", o.ResponseText)
 	fmt.Printf("\tIsRootNode: %v\n", o.IsRootNode)
 	fmt.Printf("\tParentNodeResponse: %v\n", o.ParentNodeResponse)
-	fmt.Printf("\tvalidateResponseMethod.typeName: %v\n", o.validateResponseMethod.typeName)
-	fmt.Printf("\tvalidateResponseMethod.methodName: %v\n", o.validateResponseMethod.methodName)
+	fmt.Printf("\tresponseHandlerMethod.methodName: %v\n", o.responseHandlerMethod.methodName)
 	if len(o.QuickReplies) > 0 {
 		fmt.Printf("\tQuick Replies:\n")
 		for i, qr := range o.QuickReplies {

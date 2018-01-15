@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/jcgarciaram/demoPark/dynahelpers"
-	"github.com/jcgarciaram/demoPark/utils"
+	"github.com/jcgarciaram/boomy/dynahelpers"
+	"github.com/jcgarciaram/boomy/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -110,6 +110,8 @@ func (o *ConversationTree) SetRootNode(ctn *ConversationTreeNode) {
 // Register ConversationTree adds conversation tree to map which will be used
 func (o *ConversationTree) Register() {
 	convTreeMap[o.GetID()] = o
+
+	fmt.Println("convTreeMap:", convTreeMap)
 
 	buildTreeFromRootNode(o.RootNode)
 }

@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/jcgarciaram/demoPark/utils"
+	"github.com/jcgarciaram/boomy/utils"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws"

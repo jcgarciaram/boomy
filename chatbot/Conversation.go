@@ -1,8 +1,8 @@
 package chatbot
 
 import (
-	"github.com/jcgarciaram/demoPark/dynahelpers"
-	"github.com/jcgarciaram/demoPark/utils"
+	"github.com/jcgarciaram/boomy/dynahelpers"
+	"github.com/jcgarciaram/boomy/utils"
 	uuid "github.com/satori/go.uuid"
 
 	"log"
@@ -10,13 +10,18 @@ import (
 
 // Conversation is a single conversation with a recipient
 type Conversation struct {
-	SenderID           string `dynamo:"ID,hash"`
+	SenderID           string `dynamo:"ID"`
 	ConversationTreeID string `dynamo:"ConversationTreeID"`
 	CurrentNodeID      string `dynamo:"CurrentNodeID"`
 }
 
 // Conversations is a slice of Conversation
 type Conversations []Conversation
+
+// CustomType will stand in place for all types that will have Conversation as one of its fields
+// type CustomType interface {
+// 	Conversation
+// }
 
 // Save puts struct o in Dynamo
 func (o *Conversation) Save() error {

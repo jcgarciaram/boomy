@@ -2,9 +2,12 @@ package APIHelpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/jcgarciaram/boomy/utils"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -75,7 +78,7 @@ func UnmarshalBody(r *http.Request, o interface{}) error {
 
 		logrus.WithFields(logrus.Fields{
 			"err": err,
-		}).Warn("Error marshaling JSON to packageConfig struct")
+		}).Warn(fmt.Sprintf("Error marshaling JSON to %s struct", utils.GetType(o)))
 
 		return err
 	}

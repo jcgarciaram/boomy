@@ -2,13 +2,13 @@
     var s CustomStruct
     chatbot.RegisterType(s)
 
-- Type that represents a user that a conversation will be happening with needs to add chatbot.CurrentState to their struct.
+- Type that represents a user that a conversation will be happening with needs to add chatbot.Conversation to their struct.
     type ChatUser struct {
         // Your fields
         Email string
 
         // Required
-        chatbot.CurrentState
+        chatbot.Conversation
     }
 
 - Build conversation trees and register them using.
@@ -36,3 +36,6 @@
 	node1.AddChildNode(node2)
 
 	ct.Register()
+
+- Types of ConversationTreeNodes:
+	

@@ -1,10 +1,9 @@
-package demoParkDB
+package boomyDB
 
 import (
 	"log"
 
-	"github.com/jcgarciaram/demoPark/chatbot"
-	"github.com/jcgarciaram/demoPark/dynahelpers"
+	"github.com/jcgarciaram/boomy/dynahelpers"
 )
 
 // InitializeDB initializes all necessary tables
@@ -19,31 +18,31 @@ func InitializeDB(dynamoInitChan chan struct{}) chan struct{} {
 		if err := dynahelpers.CreateTable(c); err != nil {
 			log.Fatal(err)
 		}
-		chatbot.RegisterType(c)
+		// chatbot.RegisterType(c)
 
 		var pd ParkingDeck
 		if err := dynahelpers.CreateTable(pd); err != nil {
 			log.Fatal(err)
 		}
-		chatbot.RegisterType(pd)
+		// chatbot.RegisterType(pd)
 
 		var ps ParkingSpace
 		if err := dynahelpers.CreateTable(ps); err != nil {
 			log.Fatal(err)
 		}
-		chatbot.RegisterType(ps)
+		// chatbot.RegisterType(ps)
 
 		var r Residence
 		if err := dynahelpers.CreateTable(r); err != nil {
 			log.Fatal(err)
 		}
-		chatbot.RegisterType(r)
+		// chatbot.RegisterType(r)
 
 		var rsdnt Resident
 		if err := dynahelpers.CreateTable(rsdnt); err != nil {
 			log.Fatal(err)
 		}
-		chatbot.RegisterType(rsdnt)
+		// chatbot.RegisterType(rsdnt)
 
 		dbInitChan <- struct{}{}
 	}()

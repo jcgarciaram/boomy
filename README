@@ -6,3 +6,9 @@ Need local Dynamo installed
 Environment Variables that need to be defined:
     - AWS_REGION
     - 
+
+
+TODO:
+    - Build Resident handler for completely new users that are talking through chat.
+    - Will initialize Resident with just ID and Conversation struct and return token
+    - Complete GetResponse

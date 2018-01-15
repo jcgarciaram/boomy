@@ -3,7 +3,7 @@ package chatbot
 import (
 	"log"
 
-	"github.com/jcgarciaram/demoPark/dynahelpers"
+	"github.com/jcgarciaram/boomy/dynahelpers"
 )
 
 // InitializeConv

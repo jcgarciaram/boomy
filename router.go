@@ -5,16 +5,16 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/jcgarciaram/demoPark/demoParkAPI"
-	r "github.com/jcgarciaram/demoPark/demoParkAPI/routes"
+	"github.com/jcgarciaram/boomy/boomyAPI"
+	r "github.com/jcgarciaram/boomy/boomyAPI/routes"
 )
 
 func NewRouter() *mux.Router {
 
 	routes := r.Routes{}
 
-	// Append demoParkAPI routes
-	routes.AppendRoutes(demoParkAPI.GetRoutes())
+	// Append boomyAPI routes
+	routes.AppendRoutes(boomyAPI.GetRoutes())
 
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {

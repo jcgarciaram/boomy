@@ -1,7 +1,7 @@
-package demoParkAPI
+package boomyAPI
 
 import (
-	r "github.com/jcgarciaram/demoPark/demoParkAPI/routes"
+	r "github.com/jcgarciaram/boomy/boomyAPI/routes"
 )
 
 var allRoutes = r.Routes{
@@ -10,7 +10,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PostComplex",
 		Method:      "POST",
-		Pattern:     "/v1/api/demopark/complex",
+		Pattern:     "/v1/api/boomy/complex",
 		HandlerFunc: PostComplex,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -19,7 +19,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PutComplex",
 		Method:      "PUT",
-		Pattern:     "/v1/api/demopark/complex/{complex}",
+		Pattern:     "/v1/api/boomy/complex/{complex}",
 		HandlerFunc: PutComplex,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -28,7 +28,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetComplex",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/complex/{complex}",
+		Pattern:     "/v1/api/boomy/complex/{complex}",
 		HandlerFunc: GetComplex,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -37,7 +37,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetComplexes",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/complex",
+		Pattern:     "/v1/api/boomy/complex",
 		HandlerFunc: GetComplexes,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -47,7 +47,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PostParkingDeck",
 		Method:      "POST",
-		Pattern:     "/v1/api/demopark/parkingdeck",
+		Pattern:     "/v1/api/boomy/parkingdeck",
 		HandlerFunc: PostParkingDeck,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -56,7 +56,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PutParkingDeck",
 		Method:      "PUT",
-		Pattern:     "/v1/api/demopark/parkingdeck/{parkingdeck}",
+		Pattern:     "/v1/api/boomy/parkingdeck/{parkingdeck}",
 		HandlerFunc: PutParkingDeck,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -65,7 +65,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetParkingDeck",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/parkingdeck/{parkingdeck}",
+		Pattern:     "/v1/api/boomy/parkingdeck/{parkingdeck}",
 		HandlerFunc: GetParkingDeck,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -74,7 +74,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetParkingDecks",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/parkingdeck",
+		Pattern:     "/v1/api/boomy/parkingdeck",
 		HandlerFunc: GetParkingDecks,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -84,7 +84,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PostParkingSpace",
 		Method:      "POST",
-		Pattern:     "/v1/api/demopark/parkingspace",
+		Pattern:     "/v1/api/boomy/parkingspace",
 		HandlerFunc: PostParkingSpace,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -93,7 +93,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PutParkingSpace",
 		Method:      "PUT",
-		Pattern:     "/v1/api/demopark/parkingspace/{parkingspace}",
+		Pattern:     "/v1/api/boomy/parkingspace/{parkingspace}",
 		HandlerFunc: PutParkingSpace,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -102,7 +102,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetParkingSpace",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/parkingspace/{parkingspace}",
+		Pattern:     "/v1/api/boomy/parkingspace/{parkingspace}",
 		HandlerFunc: GetParkingSpace,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -111,7 +111,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetParkingSpaces",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/parkingspace",
+		Pattern:     "/v1/api/boomy/parkingspace",
 		HandlerFunc: GetParkingSpaces,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -121,7 +121,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PostResidence",
 		Method:      "POST",
-		Pattern:     "/v1/api/demopark/residence",
+		Pattern:     "/v1/api/boomy/residence",
 		HandlerFunc: PostResidence,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -130,7 +130,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PutResidence",
 		Method:      "PUT",
-		Pattern:     "/v1/api/demopark/residence/{residence}",
+		Pattern:     "/v1/api/boomy/residence/{residence}",
 		HandlerFunc: PutResidence,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -139,7 +139,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetResidence",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/residence/{residence}",
+		Pattern:     "/v1/api/boomy/residence/{residence}",
 		HandlerFunc: GetResidence,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -148,7 +148,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetResidences",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/residence",
+		Pattern:     "/v1/api/boomy/residence",
 		HandlerFunc: GetResidences,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -158,7 +158,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PostResident",
 		Method:      "POST",
-		Pattern:     "/v1/api/demopark/resident",
+		Pattern:     "/v1/api/boomy/resident",
 		HandlerFunc: PostResident,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -167,7 +167,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "PutResident",
 		Method:      "PUT",
-		Pattern:     "/v1/api/demopark/resident/{resident}",
+		Pattern:     "/v1/api/boomy/resident/{resident}",
 		HandlerFunc: PutResident,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -176,7 +176,7 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetResident",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/resident/{resident}",
+		Pattern:     "/v1/api/boomy/resident/{resident}",
 		HandlerFunc: GetResident,
 		VerifyJWT:   false,
 		VerifyPerms: true,
@@ -185,8 +185,26 @@ var allRoutes = r.Routes{
 	r.Route{
 		Name:        "GetResidents",
 		Method:      "GET",
-		Pattern:     "/v1/api/demopark/resident",
+		Pattern:     "/v1/api/boomy/resident",
 		HandlerFunc: GetResidents,
+		VerifyJWT:   false,
+		VerifyPerms: true,
+	},
+
+	r.Route{
+		Name:        "ResidentPostMessage",
+		Method:      "POST",
+		Pattern:     "/v1/api/boomy/resident/message",
+		HandlerFunc: ResidentPostMessage,
+		VerifyJWT:   true,
+		VerifyPerms: true,
+	},
+
+	r.Route{
+		Name:        "ResidentBeginConversation",
+		Method:      "POST",
+		Pattern:     "/v1/api/boomy/resident/conversation",
+		HandlerFunc: ResidentBeginConversation,
 		VerifyJWT:   false,
 		VerifyPerms: true,
 	},

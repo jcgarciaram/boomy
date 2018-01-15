@@ -1,4 +1,4 @@
-package demoParkDB
+package boomyDB
 
 const (
 	// ParkingTypeStandard is a standard Parking Space. No special restrictions
