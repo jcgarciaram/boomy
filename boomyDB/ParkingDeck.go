@@ -1,10 +1,10 @@
-package demoParkDB
+package boomyDB
 
 import (
 	"log"
 
-	"github.com/jcgarciaram/demoPark/dynahelpers"
-	"github.com/jcgarciaram/demoPark/utils"
+	"github.com/jcgarciaram/boomy/dynahelpers"
+	"github.com/jcgarciaram/boomy/utils"
 	uuid "github.com/satori/go.uuid"
 )
 

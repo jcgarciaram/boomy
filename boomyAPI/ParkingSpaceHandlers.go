@@ -1,4 +1,4 @@
-package demoParkAPI
+package boomyAPI
 
 import (
 	"encoding/json"
@@ -7,16 +7,16 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	apih "github.com/jcgarciaram/demoPark/demoParkAPI/APIHelpers"
-	"github.com/jcgarciaram/demoPark/demoParkDB"
-	"github.com/jcgarciaram/demoPark/utils"
+	apih "github.com/jcgarciaram/boomy/boomyAPI/APIHelpers"
+	"github.com/jcgarciaram/boomy/boomyDB"
+	"github.com/jcgarciaram/boomy/utils"
 )
 
-// PostParkingDeck creates a new ParkingDeck
-func PostParkingDeck(w http.ResponseWriter, r *http.Request) {
+// PostParkingSpace creates a new ParkingSpace
+func PostParkingSpace(w http.ResponseWriter, r *http.Request) {
 
 	// Struct to unmarshal body of request into
-	var o demoParkDB.ParkingDeck
+	var o boomyDB.ParkingSpace
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -34,15 +34,15 @@ func PostParkingDeck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PutParkingDeck updates an existing ParkingDeck
-func PutParkingDeck(w http.ResponseWriter, r *http.Request) {
+// PutParkingSpace updates an existing ParkingSpace
+func PutParkingSpace(w http.ResponseWriter, r *http.Request) {
 
 	// Get the variables from the request
 	vars := mux.Vars(r)
-	ID := vars["parkingdeck"]
+	ID := vars["parkingspace"]
 
 	// Struct to unmarshal body of request into
-	var o demoParkDB.ParkingDeck
+	var o boomyDB.ParkingSpace
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -60,15 +60,15 @@ func PutParkingDeck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetParkingDeck gets a specific ParkingDeck
-func GetParkingDeck(w http.ResponseWriter, r *http.Request) {
+// GetParkingSpace gets a specific ParkingSpace
+func GetParkingSpace(w http.ResponseWriter, r *http.Request) {
 
 	// Get the variables from the request
 	vars := mux.Vars(r)
-	ID := vars["parkingdeck"]
+	ID := vars["parkingspace"]
 
 	// Struct to unmarshal result from Dynamo into
-	var o demoParkDB.ParkingDeck
+	var o boomyDB.ParkingSpace
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -86,11 +86,11 @@ func GetParkingDeck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetParkingDecks gets all ParkingDecks from Dynamo
-func GetParkingDecks(w http.ResponseWriter, r *http.Request) {
+// GetParkingSpaces gets all ParkingSpaces from Dynamo
+func GetParkingSpaces(w http.ResponseWriter, r *http.Request) {
 
 	// Struct to unmarshal result from Dynamo into
-	var o demoParkDB.ParkingDecks
+	var o boomyDB.ParkingSpaces
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

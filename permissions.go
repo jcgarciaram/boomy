@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	// "time"
 	"net/http"
@@ -33,3 +34,4 @@ func VerifyPermissions(inner http.Handler) http.Handler {
 		inner.ServeHTTP(w, r)
 	})
 }
+*/

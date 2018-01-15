@@ -1,4 +1,4 @@
-package demoParkAPI
+package boomyAPI
 
 import (
 	"encoding/json"
@@ -7,16 +7,16 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	apih "github.com/jcgarciaram/demoPark/demoParkAPI/APIHelpers"
-	"github.com/jcgarciaram/demoPark/demoParkDB"
-	"github.com/jcgarciaram/demoPark/utils"
+	apih "github.com/jcgarciaram/boomy/boomyAPI/APIHelpers"
+	"github.com/jcgarciaram/boomy/boomyDB"
+	"github.com/jcgarciaram/boomy/utils"
 )
 
-// PostComplex creates a new complex
-func PostComplex(w http.ResponseWriter, r *http.Request) {
+// PostResidence creates a new Residence
+func PostResidence(w http.ResponseWriter, r *http.Request) {
 
 	// Struct to unmarshal body of request into
-	var o demoParkDB.Complex
+	var o boomyDB.Residence
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -34,21 +34,22 @@ func PostComplex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PutComplex updates an existing complex
-func PutComplex(w http.ResponseWriter, r *http.Request) {
+// PutResidence updates an existing Residence
+func PutResidence(w http.ResponseWriter, r *http.Request) {
 
 	// Get the variables from the request
 	vars := mux.Vars(r)
-	ID := vars["complex"]
+	ID := vars["residence"]
 
 	// Struct to unmarshal body of request into
-	var o demoParkDB.Complex
+	var o boomyDB.Residence
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err := apih.PutHelper(r, &o, ID); err != nil {
 		http.Error(w, fmt.Sprintf("There was an updating the %s. Please contact your administrator.\n", utils.GetType(o)), http.StatusInternalServerError)
+		return
 	}
 
 	// Encode array returned into JSON and return
@@ -59,21 +60,22 @@ func PutComplex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetComplex gets a specific complex
-func GetComplex(w http.ResponseWriter, r *http.Request) {
+// GetResidence gets a specific Residence
+func GetResidence(w http.ResponseWriter, r *http.Request) {
 
 	// Get the variables from the request
 	vars := mux.Vars(r)
-	ID := vars["complex"]
+	ID := vars["residence"]
 
 	// Struct to unmarshal result from Dynamo into
-	var o demoParkDB.Complex
+	var o boomyDB.Residence
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err := apih.GetHelper(r, &o, ID); err != nil {
 		http.Error(w, fmt.Sprintf("There was an error getting the %s. Please contact your administrator.\n", utils.GetType(o)), http.StatusInternalServerError)
+		return
 	}
 
 	// Encode array returned into JSON and return
@@ -84,17 +86,18 @@ func GetComplex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetComplexes gets all complexes from Dynamo
-func GetComplexes(w http.ResponseWriter, r *http.Request) {
+// GetResidences gets all Residences from Dynamo
+func GetResidences(w http.ResponseWriter, r *http.Request) {
 
 	// Struct to unmarshal result from Dynamo into
-	var o demoParkDB.Complexes
+	var o boomyDB.Residences
 
 	// Set content type returned to JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err := apih.GetAllHelper(r, &o); err != nil {
 		http.Error(w, fmt.Sprintf("There was an error getting the %s. Please contact your administrator.\n", utils.GetType(o)), http.StatusInternalServerError)
+		return
 	}
 
 	// Encode array returned into JSON and return

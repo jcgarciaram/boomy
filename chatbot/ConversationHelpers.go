@@ -1,53 +1,57 @@
 package chatbot
 
-import "fmt"
+import (
+	"log"
+)
 
-// getResponse queries Dynamo database to get the current state of the conversation
+// GetResponse queries Dynamo database to get the current state of the conversation
 // Then looks at the conversation tree and comes up with a response.
-func getResponse(senderId string, message string) (string, []*QuickReply, error) {
+func GetResponse(o interface{}, c *Conversation, message string) (string, []string, error) {
 
-	// Get conversation
-	var c Conversation
-	if err := c.Get(senderId); err != nil && err.Error() != "dynamo: no item found" {
-		return "", nil, err
+	// fmt.Println("GetResponse.Conversation.ConversationTreeID:", c.ConversationTreeID)
+	// fmt.Println("GetResponse.Conversation.CurrentNodeID:", c.CurrentNodeID)
+
+	// If we don't have a node yet, then we start at the root.
+	var currNode *ConversationTreeNode
+	if c.CurrentNodeID == "" {
+		currNode = convTreeMap[c.ConversationTreeID].RootNode
+	} else {
+		currNode = convNodeMap[c.CurrentNodeID]
 	}
-
-	// If conversation doesn't exit, user has never registered. Begin new user conversation
-	if c.SenderID == "" {
-		fmt.Println("New user!")
-
-		c.SenderID = senderId
-
-		// Get Conversation Tree by type
-		var ct2 ConversationTree
-		if err := ct2.GetOneByField("ConversationType", ConversationTypeNewUser); err != nil {
-			return "", nil, err
-		}
-
-		// Get conversation tree map from map
-		ct := convTreeMap[ct2.ID]
-
-		// Save conversation
-		c.ConversationTreeID = ct.ID
-		c.CurrentNodeID = ct.RootNode.ID
-		if err := c.Save(); err != nil {
-			return "", nil, err
-		}
-
-		textResponse := ct.RootNode.ResponseText
-		quickReplies := ct.RootNode.QuickReplies
-
-		return textResponse, quickReplies, nil
-	}
-
-	// Because we already have a conversation started with this recipient, we can analyze the message they've sent and come up with our response
-	currNode := convNodeMap[c.CurrentNodeID]
 
 	// fmt.Printf("\n\ncurrNode: %v\n\n", currNode)
 
-	// Validate response
-	if ok, mess := currNode.ValidateResponse(message); !ok {
-		return mess, currNode.QuickReplies, nil
+	// If we are expecting a QuickReply
+	if currNode.ExpectedReplyType == ExpectedReplyTypeQuickReply {
+
+		// Iterate through the QuickReplies in this node, find the correct one and
+		// execute the response handler method if necessary
+		var foundReply bool
+		for _, qr := range currNode.QuickReplies {
+			if qr.ReplyText == message {
+				foundReply = true
+
+				if qr.responseHandlerMethod.methodName != "" {
+					if err := qr.ResponseHandler(o, message); err != nil {
+						log.Fatal("somethig went horribly wrong")
+					}
+				}
+				break
+			}
+		}
+		if !foundReply {
+			response := "Whoops. I can only understand one of the options below. Can you please select one?\n\n"
+			return response + currNode.ResponseText, QuickReplyStringSlice(currNode.QuickReplies), nil
+		}
+
+	} else if currNode.ExpectedReplyType == ExpectedReplyTypeAny {
+		if currNode.responseHandlerMethod.methodName != "" {
+			if err := currNode.ResponseHandler(o, message); err != nil {
+				message = "0"
+			} else {
+				message = "1"
+			}
+		}
 	}
 
 	var nextNode *ConversationTreeNode
@@ -82,12 +86,11 @@ func getResponse(senderId string, message string) (string, []*QuickReply, error)
 		return "Something bad happened. Help me...", nil, nil
 	}
 
+	// fmt.Printf("\n\nnextNode: %v\n\n", nextNode)
+
 	// Save new state of conversation
 	c.CurrentNodeID = nextNode.GetID()
-	if err := c.Save(); err != nil {
-		return "", nil, err
-	}
 
-	return nextNode.ResponseText, nextNode.QuickReplies, nil
+	return nextNode.ResponseText, QuickReplyStringSlice(nextNode.QuickReplies), nil
 
 }

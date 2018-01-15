@@ -1,0 +1,41 @@
+- Types that will be interacting with Chatbot need to register in order to be able to pass message handler functions to specific nodes.
+    var s CustomStruct
+    chatbot.RegisterType(s)
+
+- Type that represents a user that a conversation will be happening with needs to add chatbot.Conversation to their struct.
+    type ChatUser struct {
+        // Your fields
+        Email string
+
+        // Required
+        chatbot.Conversation
+    }
+
+- Build conversation trees and register them using.
+    ct := chatbot.ConversationTree{
+		ConversationType: chatbot.ConversationTypeNewUser,
+	}
+
+	node1 := &chatbot.ConversationTreeNode{
+		ResponseText:      "Hey there! Excited to get started? Because we are! First thing's first. What's your phone number?",
+		ExpectedReplyType: chatbot.ExpectedReplyTypePhoneNumber,
+	}
+
+	ct.SetRootNode(node1)
+
+	node2 := &chatbot.ConversationTreeNode{
+		ResponseText:      "Awesome! Do you authorize us to send you a quick code through text message? We promise we won't send you text messages without asking your permission first.",
+		ExpectedReplyType: chatbot.ExpectedReplyTypeQuickReply,
+	}
+
+	node2.AddQuickReplies(
+		chatbot.NewQuickReply("Yes"),
+		chatbot.NewQuickReply("No"),
+	)
+
+	node1.AddChildNode(node2)
+
+	ct.Register()
+
+- Types of ConversationTreeNodes:
+	
