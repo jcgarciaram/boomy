@@ -1,48 +1,36 @@
 package boomyDB
 
 import (
-	"log"
+	"github.com/jinzhu/gorm"
+)
 
-	"github.com/jcgarciaram/boomy/dynahelpers"
+var (
+	db *gorm.DB
 )
 
 // InitializeDB initializes all necessary tables
-func InitializeDB(dynamoInitChan chan struct{}) chan struct{} {
+func InitializeDB(dbGorm *gorm.DB) chan struct{} {
+	db = dbGorm
 	dbInitChan := make(chan struct{})
 	go func() {
 
-		<-dynamoInitChan
-
 		// Create all tables
 		var c Complex
-		if err := dynahelpers.CreateTable(c); err != nil {
-			log.Fatal(err)
-		}
 		// chatbot.RegisterType(c)
 
 		var pd ParkingDeck
-		if err := dynahelpers.CreateTable(pd); err != nil {
-			log.Fatal(err)
-		}
 		// chatbot.RegisterType(pd)
 
 		var ps ParkingSpace
-		if err := dynahelpers.CreateTable(ps); err != nil {
-			log.Fatal(err)
-		}
 		// chatbot.RegisterType(ps)
 
 		var r Residence
-		if err := dynahelpers.CreateTable(r); err != nil {
-			log.Fatal(err)
-		}
 		// chatbot.RegisterType(r)
 
 		var rsdnt Resident
-		if err := dynahelpers.CreateTable(rsdnt); err != nil {
-			log.Fatal(err)
-		}
 		// chatbot.RegisterType(rsdnt)
+
+		db.AutoMigrate(c, pd, ps, r, rsdnt)
 
 		dbInitChan <- struct{}{}
 	}()

@@ -2,26 +2,23 @@ package chatbot
 
 import (
 	"fmt"
-	"log"
 	"reflect"
-	"runtime"
 
-	"github.com/jcgarciaram/boomy/dynahelpers"
 	"github.com/jcgarciaram/boomy/utils"
-	uuid "github.com/satori/go.uuid"
+	"github.com/jinzhu/gorm"
 )
 
 // ConversationTreeNode is saved in Dynamo. Used by ConversationTree to build up the tree in memory
 type ConversationTreeNode struct {
-	ID                   string      `dynamo:"ID,hash"`
-	ConversationTreeID   string      `dynamo:"ConversationTreeID"`
-	ResponseText         string      `dynamo:"ResponseText"`
-	ExpectedReplyType    int         `dynamo:"ExpectedReplyType"`
-	QuickReplyIDs        []string    `dynamo:"QuickReplyIDs"`
-	ChildrenNodeIDs      []string    `dynamo:"ChildrenNodeIDs"`
-	DayIntervalIncrement int         `dynamo:"DayIntervalIncrement"`
-	IsRootNode           bool        `dynamo:"IsRootNode"`
-	ParentNodeResponse   interface{} `dynamo:"ParentNodeResponse"`
+	gorm.Model
+	ConversationTreeID   uint
+	ResponseText         string
+	ExpectedReplyType    int
+	QuickReplyIDs        []uint `gorm:"-"`
+	ChildrenNodeIDs      []uint `gorm:"-"`
+	DayIntervalIncrement int
+	IsRootNode           bool
+	ParentNodeResponse   interface{} `gorm:"-"`
 
 	// We can store a struct that will contain the name of the type that contains the function and the name of function itself in strings.
 	// We then need another function that has a default variable of all necessary types and depending on the type uses that default variable and reflection below to call the method. All methods should return bool
@@ -33,45 +30,42 @@ type ConversationTreeNode struct {
 	//
 	// https://play.golang.org/p/2TugHjN1IUk
 	//
-	responseHandlerMethod
+	ResponseHandlerMethod ResponseHandlerMethod
 
 	// Hydrate Up
-	ConversationTree *ConversationTree `dynamo:"-"`
+	ConversationTree *ConversationTree `gorm:"-"`
 
 	// Hydrate Down
-	Visited       bool                    `dynamo:"-"`
-	QuickReplies  []*QuickReply           `dynamo:"-"`
-	ChildrenNodes []*ConversationTreeNode `dynamo:"-"`
+	Visited       bool                    `gorm:"-"`
+	QuickReplies  []*QuickReply           `gorm:"-"`
+	ChildrenNodes []*ConversationTreeNode `gorm:"-"`
 }
 
 // ConversationTreeNodes is a slice of ConversationTreeNode
 type ConversationTreeNodes []ConversationTreeNode
 
-// Save puts struct o in Dynamo
-func (o *ConversationTreeNode) Save() error {
-	if o.ID == "" {
-		o.ID = uuid.NewV4().String()
+// Save creates if ID = 0 or update id ID > 0
+func (o *ConversationTreeNode) Save(conn utils.Conn) error {
+	var err error
+	if o.ID == 0 {
+		err = conn.Create(o).Error
+	} else {
+		err = conn.Update(o).Error
 	}
-
-	if err := dynahelpers.DynamoPut(o); err != nil {
-		log.Printf("Error saving object of type %s\n", utils.GetType(o))
+	if err != nil {
 		return err
 	}
-	return nil
-}
 
-// Get gets a struct from Dynamo and unmarshals results into o
-func (o *ConversationTreeNode) Get(ID string) error {
-	if err := dynahelpers.DynamoGet(ID, o); err != nil {
-		log.Printf("Error getting object of type %s\n", utils.GetType(o))
-		return err
+	ctnqrs := make([]*ConversationTreeNodeQuickReply, len(o.QuickReplyIDs))
+	for i, qrID := range o.QuickReplyIDs {
+		ctnqr := &ConversationTreeNodeQuickReply{
+			ConversationTreeNodeID: o.ID,
+			QuickReplyID:           qrID,
+		}
+		ctnqrs[i] = ctnqr
 	}
-	return nil
-}
-
-// Validate validates an object
-func (o *ConversationTreeNode) Validate() error {
-	for _, err := range dynahelpers.ValidateStruct(*o) {
+	if len(ctnqrs) > 0 {
+		err = conn.Create(ctnqrs).Error
 		if err != nil {
 			return err
 		}
@@ -79,34 +73,20 @@ func (o *ConversationTreeNode) Validate() error {
 	return nil
 }
 
-// GetID gets a struct from Dynamo and unmarshals results into o
-func (o *ConversationTreeNode) GetID() string {
-	if o.ID == "" {
-		o.ID = uuid.NewV4().String()
+// Validate validates an object
+func (o *ConversationTreeNode) Validate() error {
+	for _, err := range utils.ValidateStruct(*o) {
+		if err != nil {
+			return err
+		}
 	}
-
-	return o.ID
-}
-
-// GetAll gets all records from Dynamo and unmarshals results into o
-func (oSlice *ConversationTreeNodes) GetAll() error {
-	var o ConversationTreeNode
-	if err := dynahelpers.DynamoGetAll(o, oSlice); err != nil {
-		log.Printf("Error getting object of type %s\n", utils.GetType(o))
-		return err
-	}
-
-	if len(*oSlice) == 0 {
-		*oSlice = make([]ConversationTreeNode, 0)
-	}
-
 	return nil
 }
 
 // AddChildNode adds a new child node to ConversationTreeNode
 func (o *ConversationTreeNode) AddChildNode(ctn *ConversationTreeNode) {
 
-	o.ChildrenNodeIDs = append(o.ChildrenNodeIDs, ctn.GetID())
+	o.ChildrenNodeIDs = append(o.ChildrenNodeIDs, ctn.ID)
 	o.ChildrenNodes = append(o.ChildrenNodes, ctn)
 
 	ctn.ConversationTreeID = o.ConversationTreeID
@@ -117,21 +97,21 @@ func (o *ConversationTreeNode) AddChildNode(ctn *ConversationTreeNode) {
 func (o *ConversationTreeNode) AddQuickReplies(qrs ...*QuickReply) {
 
 	for _, qr := range qrs {
-		o.QuickReplyIDs = append(o.QuickReplyIDs, qr.GetID())
+		o.QuickReplyIDs = append(o.QuickReplyIDs, qr.ID)
 		o.QuickReplies = append(o.QuickReplies, qr)
 
-		qr.NodeID = o.GetID()
+		qr.NodeID = o.ID
 	}
 
 }
 
 // SetResponseHandlerMethod sets the responseHandlerMethod for a ConversationTreeNode
-func (o *ConversationTreeNode) SetResponseHandlerMethod(method func(interface{}, string) error) {
+func (o *ConversationTreeNode) SetResponseHandlerMethod(method func(utils.Conn, interface{}, string) error) {
 
-	RegisterMethod(method)
+	methodName := RegisterMethod(method)
 
 	// Reflect magic to get the function's name
-	o.responseHandlerMethod.methodName = runtime.FuncForPC(reflect.ValueOf(method).Pointer()).Name()
+	o.ResponseHandlerMethod.MethodName = methodName
 
 }
 
@@ -144,7 +124,7 @@ func (o *ConversationTreeNode) ValidateResponse(r string) (bool, string) {
 
 		// If expected reply has to be an email
 	} else if o.ExpectedReplyType == ExpectedReplyTypeEmail {
-		var ev dynahelpers.EmailValidator
+		var ev utils.EmailValidator
 		if ok, _ := ev.Validate(r); !ok {
 			return false, "Oh no, the message you sent is not a valid email. Please reply with a valid email."
 		}
@@ -183,7 +163,7 @@ func (o *ConversationTreeNode) ValidateQuickReplyResponse(r string, qr *QuickRep
 // ResponseHandler handles the reponse received using the method defined in validateResponseMethod
 func (o *ConversationTreeNode) ResponseHandler(r interface{}, s string) error {
 
-	methodName := o.responseHandlerMethod.methodName
+	methodName := o.ResponseHandlerMethod.MethodName
 	methodValue := methodMap[methodName]
 
 	errInterface := methodValue.Call([]reflect.Value{reflect.ValueOf(r), reflect.ValueOf(s)})[0].Interface()
@@ -199,11 +179,11 @@ func (o *ConversationTreeNode) ResponseHandler(r interface{}, s string) error {
 
 // Print prints to console a ConversationTreeNode in a readable manner.
 func (o *ConversationTreeNode) Print() {
-	fmt.Printf("Node ID: %s\n", o.ID)
+	fmt.Printf("Node ID: %d\n", o.ID)
 	fmt.Printf("\tResponse: %s\n", o.ResponseText)
 	fmt.Printf("\tIsRootNode: %v\n", o.IsRootNode)
 	fmt.Printf("\tParentNodeResponse: %v\n", o.ParentNodeResponse)
-	fmt.Printf("\tresponseHandlerMethod.methodName: %v\n", o.responseHandlerMethod.methodName)
+	fmt.Printf("\tResponseHandlerMethod.MethodName: %v\n", o.ResponseHandlerMethod.MethodName)
 	if len(o.QuickReplies) > 0 {
 		fmt.Printf("\tQuick Replies:\n")
 		for i, qr := range o.QuickReplies {

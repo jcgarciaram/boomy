@@ -1,24 +1,15 @@
-package boomyAPI
+package main
 
 import (
-	"fmt"
-
+	"github.com/jcgarciaram/boomy/boomyAPI"
 	"github.com/jcgarciaram/boomy/chatbot"
 	"github.com/jcgarciaram/boomy/utils"
 )
 
-func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
-
-	newUserConvTree := &chatbot.ConversationTree{}
-
-	//TODO: look for error here
-	conn.First(newUserConvTree, ConversationTreeIDNewResident)
-	if newUserConvTree.ID != 0 {
-		return newUserConvTree
+func buildNewResidentConversation(conn utils.Conn) chatbot.ConversationTree {
+	ct := chatbot.ConversationTree{
+		Nickname: boomyAPI.ConversationTreeNicknameNewResident,
 	}
-
-	// newUserConvTree.ID = ConversationTreeIDNewResident
-	newUserConvTree.Nickname = ConversationTreeNicknameNewResident
 
 	// Declare Root node
 	node1 := &chatbot.ConversationTreeNode{
@@ -37,7 +28,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ExpectedReplyType:  chatbot.ExpectedReplyTypeAny,
 		ParentNodeResponse: "Yes",
 	}
-	node2.SetResponseHandlerMethod(ResidentSetFirstName)
+	node2.SetResponseHandlerMethod(boomyAPI.ResidentSetFirstName)
 
 	// Are you sure?
 	node3 := &chatbot.ConversationTreeNode{
@@ -58,7 +49,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ParentNodeResponse: "1",
 	}
 
-	node4.SetResponseHandlerMethod(ResidentSetLastName)
+	node4.SetResponseHandlerMethod(boomyAPI.ResidentSetLastName)
 
 	// Phone Number
 	node5 := &chatbot.ConversationTreeNode{
@@ -67,7 +58,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ParentNodeResponse: "1",
 	}
 
-	node5.SetResponseHandlerMethod(ResidentSendValidationCode)
+	node5.SetResponseHandlerMethod(boomyAPI.ResidentSendValidationCode)
 
 	// Invalid Phone
 	node6 := &chatbot.ConversationTreeNode{
@@ -76,7 +67,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ParentNodeResponse: "0",
 	}
 
-	node6.SetResponseHandlerMethod(ResidentSendValidationCode)
+	node6.SetResponseHandlerMethod(boomyAPI.ResidentSendValidationCode)
 
 	// Sent code
 	node7 := &chatbot.ConversationTreeNode{
@@ -84,7 +75,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ExpectedReplyType:  chatbot.ExpectedReplyTypeAny,
 		ParentNodeResponse: "1",
 	}
-	node7.SetResponseHandlerMethod(ResidentCheckValidationCode)
+	node7.SetResponseHandlerMethod(boomyAPI.ResidentCheckValidationCode)
 
 	// Invalid code
 	node8 := &chatbot.ConversationTreeNode{
@@ -95,7 +86,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 
 	node8.AddQuickReplies(
 		chatbot.NewQuickReply(conn, "Try again", nil),
-		chatbot.NewQuickReply(conn, "Send me a new code", ResidentRegenerateValidationCode),
+		chatbot.NewQuickReply(conn, "Send me a new code", boomyAPI.ResidentRegenerateValidationCode),
 	)
 
 	// Sent code - again
@@ -104,7 +95,7 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ExpectedReplyType:  chatbot.ExpectedReplyTypeAny,
 		ParentNodeResponse: "Send me a new code",
 	}
-	node9.SetResponseHandlerMethod(ResidentCheckValidationCode)
+	node9.SetResponseHandlerMethod(boomyAPI.ResidentCheckValidationCode)
 
 	// Try again
 	node10 := &chatbot.ConversationTreeNode{
@@ -112,34 +103,17 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 		ExpectedReplyType:  chatbot.ExpectedReplyTypeAny,
 		ParentNodeResponse: "Try again",
 	}
-	node10.SetResponseHandlerMethod(ResidentCheckValidationCode)
+	node10.SetResponseHandlerMethod(boomyAPI.ResidentCheckValidationCode)
 
-	// Success!!
+	// Success!! Get complex code
 	node11 := &chatbot.ConversationTreeNode{
-		ResponseText:       "Success!! You have been registered.",
+		ResponseText:       "Success!! You have been registered. All right, now you should have received a complex code from your building. Can you provide us that complex code now?",
 		ExpectedReplyType:  chatbot.ExpectedReplyTypeAny,
 		ParentNodeResponse: "1",
 	}
 
-	//TODO: look for errors here
-	conn.Create(newUserConvTree)
-
-	// Set root node
-	newUserConvTree.SetRootNode(node1)
-	conn.Save(newUserConvTree)
-	conn.Save(node1)
-
-	conn.Create(node1)
-	conn.Create(node2)
-	conn.Create(node3)
-	conn.Create(node4)
-	conn.Create(node5)
-	conn.Create(node6)
-	conn.Create(node7)
-	conn.Create(node8)
-	conn.Create(node9)
-	conn.Create(node10)
-	conn.Create(node11)
+	// Define relationships
+	ct.SetRootNode(node1)
 
 	node1.AddChildNode(node2)
 	node1.AddChildNode(node3)
@@ -169,8 +143,5 @@ func buildNewUserConversation(conn utils.Conn) *chatbot.ConversationTree {
 	node10.AddChildNode(node8)
 	node10.AddChildNode(node11)
 
-	// Update conv tree with root node
-	fmt.Println("updating with root node ID", conn.Save(newUserConvTree).Error, newUserConvTree.RootNodeID)
-
-	return newUserConvTree
+	return ct
 }

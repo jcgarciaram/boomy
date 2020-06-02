@@ -1,4 +1,4 @@
-package dynahelpers
+package utils
 
 import (
 	"fmt"

@@ -1,80 +1,44 @@
 package boomyDB
 
 import (
-	"log"
-
-	"github.com/jcgarciaram/boomy/dynahelpers"
 	"github.com/jcgarciaram/boomy/utils"
-	uuid "github.com/satori/go.uuid"
+	"github.com/jinzhu/gorm"
 )
 
 // ParkingDeck represents a specific parking deck on a complex
 type ParkingDeck struct {
-	ID        string `dynamo:"ID,hash"`
-	ComplexID string `dynamo:"ComplexID"`
-	Name      string `dynamo:"Name"`
-	NumFloors int    `dynamo:"NumFloors"`
-	NumSpaces int    `dynamo:"NumSpaces"`
+	gorm.Model
+	ComplexID uint
+	Name      string
+	NumFloors int
+	NumSpaces int
 
 	// Hydrate Up
-	Complex Complex `dynamo:"-" json:"-"`
+	Complex Complex `gorm:"-" json:"-"`
 
 	// Hydrate Down
-	ParkingSpaces []ParkingSpace `dynamo:"-" json:"-"`
+	ParkingSpaces []ParkingSpace `gorm:"-" json:"-"`
 }
 
 // ParkingDecks is a slice of ParkingDeck
 type ParkingDecks []ParkingDeck
 
-// Save puts ParkingDeck struct o in Dynamo
-func (o *ParkingDeck) Save() error {
-	if o.ID == "" {
-		o.ID = uuid.NewV4().String()
-	}
-	if err := dynahelpers.DynamoPut(o); err != nil {
-		log.Printf("Error saving object of type %s\n", utils.GetType(o))
-		return err
-	}
-	return nil
+func (o *ParkingDeck) Create(conn utils.Conn) error {
+	return conn.Create(o).Error
 }
 
-// Get gets a ParkingDeck struct from Dynamo and unmarshals results into o
-func (o *ParkingDeck) Get(ID string) error {
-	if err := dynahelpers.DynamoGet(ID, o); err != nil {
-		log.Printf("Error getting object of type %s\n", utils.GetType(o))
-		return err
-	}
-	return nil
+func (o *ParkingDeck) Update(conn utils.Conn) error {
+	return conn.Update(o).Error
 }
 
-// GetID gets a struct from Dynamo and unmarshals results into o
-func (o *ParkingDeck) GetID() string {
-	if o.ID == "" {
-		o.ID = uuid.NewV4().String()
-	}
-
-	return o.ID
+func (o *ParkingDeck) First(conn utils.Conn, id uint) error {
+	return conn.First(o, id).Error
 }
 
-// Validate validates an object
 func (o *ParkingDeck) Validate() error {
-	for _, err := range dynahelpers.ValidateStruct(*o) {
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
-// GetAll gets all ParkingDeck records from Dynamo and unmarshals results into o
-func (oSlice *ParkingDecks) GetAll() error {
-	var o ParkingDeck
-	if err := dynahelpers.DynamoGetAll(o, oSlice); err != nil {
-		log.Printf("Error getting object of type %s\n", utils.GetType(o))
-		return err
-	}
-	if len(*oSlice) == 0 {
-		*oSlice = make([]ParkingDeck, 0)
-	}
-	return nil
+func (os ParkingDecks) Find(conn utils.Conn) error {
+	return conn.Find(os).Error
 }

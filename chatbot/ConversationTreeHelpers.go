@@ -3,6 +3,7 @@ package chatbot
 // BuildConversationTrees builds entire conversation trees and is kept in memory for later access
 import (
 	"fmt"
+	"log"
 )
 
 // BuildConversationTreesFromNodes builds entire conversation tree from nodes and quick replies passed
@@ -17,13 +18,20 @@ func BuildConversationTreesFromNodes(ctns ConversationTreeNodes, qrs QuickReplie
 	for i, ctn := range ctns {
 
 		// Add ConversationTreeNode (ctns) to convNodeMap
-		convNodeMap[ctn.ID] = &ctns[i]
+		convNodeIDMap[ctn.ID] = &ctns[i]
 
+		// Register method if
 		// Get conversationTree from convTreeMap. If not there, create
-		ct, ok := convTreeMap[ctn.ConversationTreeID]
+		ct, ok := convTreeIDMap[ctn.ConversationTreeID]
 		if !ok {
-			ct = &ConversationTree{}
-			convTreeMap[ctn.ConversationTreeID] = ct
+			ct := ConversationTree{}
+			fmt.Println("ctn.ConversationTreeID", ctn.ConversationTreeID)
+			if err := db.First(&ct, ctn.ConversationTreeID); err != nil {
+				log.Fatal("Error getting conversation tree:", err)
+			}
+
+			convTreeIDMap[ctn.ConversationTreeID] = &ct
+			convTreeNicknameMap[ct.Nickname] = &ct
 		}
 
 		if ctn.IsRootNode {
@@ -33,12 +41,9 @@ func BuildConversationTreesFromNodes(ctns ConversationTreeNodes, qrs QuickReplie
 	}
 
 	// Iterate through all conversation trees and build them
-	for _, ct := range convTreeMap {
+	for _, ct := range convTreeIDMap {
 		buildTreeFromNodesHelper(ct.RootNode)
 	}
-
-	// PrintConversationTrees()
-
 }
 
 func buildTreeFromNodesHelper(rootNode *ConversationTreeNode) {
@@ -61,7 +66,7 @@ func buildTreeFromNodesHelper(rootNode *ConversationTreeNode) {
 	rootNode.ChildrenNodes = make([]*ConversationTreeNode, len(rootNode.ChildrenNodeIDs))
 	for i, cnID := range rootNode.ChildrenNodeIDs {
 
-		childNode := convNodeMap[cnID]
+		childNode := convNodeIDMap[cnID]
 		rootNode.ChildrenNodes[i] = childNode
 
 		// If we haven't visited the child node, recursively call this function with it
@@ -75,17 +80,17 @@ func buildTreeFromNodesHelper(rootNode *ConversationTreeNode) {
 
 // PrintConversationTrees iterates through a tree and prints out the tree using DFS
 func PrintConversationTrees() {
-	for ID, tree := range convTreeMap {
+	for ID, tree := range convTreeIDMap {
 
-		fmt.Printf("\n\nPrinting tree: %s\n\n", ID)
+		fmt.Printf("\n\nPrinting tree: %d\n\n", ID)
 
-		parentChildNodeMap := make(map[string]map[string]struct{})
+		parentChildNodeMap := make(map[uint]map[uint]struct{})
 		printTree(tree.RootNode, parentChildNodeMap)
 	}
 }
 
 // PrintConversationTrees iterates through a tree and prints out the tree using DFS
-func printTree(n *ConversationTreeNode, parentChildNodeMap map[string]map[string]struct{}) {
+func printTree(n *ConversationTreeNode, parentChildNodeMap map[uint]map[uint]struct{}) {
 
 	n.Print()
 
@@ -100,7 +105,7 @@ func printTree(n *ConversationTreeNode, parentChildNodeMap map[string]map[string
 	for _, cn := range n.ChildrenNodes {
 
 		if innerMap, ok := parentChildNodeMap[n.ID]; !ok {
-			innerMap = make(map[string]struct{})
+			innerMap = make(map[uint]struct{})
 			innerMap[cn.ID] = struct{}{}
 
 			parentChildNodeMap[n.ID] = innerMap
@@ -120,14 +125,14 @@ func printTree(n *ConversationTreeNode, parentChildNodeMap map[string]map[string
 
 func buildTreeFromRootNode(rootNode *ConversationTreeNode) {
 
-	convNodeMap[rootNode.GetID()] = rootNode
+	convNodeIDMap[rootNode.ID] = rootNode
 
 	// Ensure we don't visit the same node twice
 	rootNode.Visited = true
 
 	// Populate quickReplyMap
 	for i, qr := range rootNode.QuickReplies {
-		quickReplyMap[qr.GetID()] = rootNode.QuickReplies[i]
+		quickReplyMap[qr.ID] = rootNode.QuickReplies[i]
 	}
 
 	// If we don't have any child nodes, we can return
@@ -142,4 +147,45 @@ func buildTreeFromRootNode(rootNode *ConversationTreeNode) {
 		}
 	}
 
+}
+
+func saveTreeFromRootNode(rootNode *ConversationTreeNode) {
+
+	fmt.Printf("\n\nrootNode: %v\n\n", *rootNode)
+
+	if err := rootNode.Save(db); err != nil {
+		log.Fatal("Error saving node:", err)
+	}
+
+	// Ensure we don't visit the same node twice
+	rootNode.Visited = true
+
+	// Save Quick Replies
+	for _, qr := range rootNode.QuickReplies {
+		if err := qr.Save(db); err != nil {
+			log.Fatal("Error saving Quick Reply:", err)
+		}
+	}
+
+	// If we don't have any child nodes, we can return
+	if len(rootNode.ChildrenNodes) == 0 {
+		return
+	}
+
+	// Iterate through child nodes if we haven't visited it, recursively call this function with it
+	for _, cn := range rootNode.ChildrenNodes {
+		if !cn.Visited {
+			saveTreeFromRootNode(cn)
+		}
+	}
+
+}
+
+// GetHydratedConversationTree gets the tree from convTreeIDMap
+func GetHydratedConversationTree(ID uint) (*ConversationTree, error) {
+	ct, ok := convTreeIDMap[ID]
+	if !ok {
+		return nil, fmt.Errorf("Converation Tree with ID %d does not exist", ID)
+	}
+	return ct, nil
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // getResidentFromJWT will read from the token and return Resident passed in request
-func getResidentIDFromJWT(r *http.Request) (string, error) {
+func getResidentIDFromJWT(r *http.Request) (uint, error) {
 
 	interfaceAPI, err := utils.GetCustomStruct(r)
 	if err != nil {
@@ -17,17 +17,19 @@ func getResidentIDFromJWT(r *http.Request) (string, error) {
 			"err": err,
 		}).Warn("Error retrieving Residents struct")
 
-		return "", err
+		return 0, err
 	}
 
-	ID, ok := interfaceAPI.(string)
+	fmt.Printf("\n\ninterfaceAPI %v %t\n\n", interfaceAPI, interfaceAPI)
+
+	ID, ok := interfaceAPI.(float64)
 	if !ok {
-		logrus.Warn("Error converting custom_struct to string")
+		logrus.Warn("Error converting custom_struct to int")
 
-		return "", fmt.Errorf("error retrieving Residents struct")
+		return 0, fmt.Errorf("error retrieving Residents struct")
 	}
 
-	return ID, nil
+	return uint(ID), nil
 
 }
 

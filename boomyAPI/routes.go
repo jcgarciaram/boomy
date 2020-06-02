@@ -208,6 +208,15 @@ var allRoutes = r.Routes{
 		VerifyJWT:   false,
 		VerifyPerms: true,
 	},
+
+	r.Route{
+		Name:        "ResidentGetConversation",
+		Method:      "GET",
+		Pattern:     "/v1/api/boomy/conversation/resident",
+		HandlerFunc: ResidentGetConversation,
+		VerifyJWT:   true,
+		VerifyPerms: true,
+	},
 }
 
 // GetRoutes returns local variable routes qhich contains all methods for the API

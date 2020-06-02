@@ -12,7 +12,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func PostHelper(r *http.Request, o TypeHelper) error {
+func PostHelper(r *http.Request, o TypeHelper, conn utils.Conn) error {
 	if err := UnmarshalBody(r, &o); err != nil {
 		return err
 	}
@@ -23,12 +23,12 @@ func PostHelper(r *http.Request, o TypeHelper) error {
 	}
 
 	// Save object
-	return o.Save()
+	return o.Create(conn)
 }
 
-func PutHelper(r *http.Request, o TypeHelper, ID string) error {
+func PutHelper(r *http.Request, o TypeHelper, ID uint, conn utils.Conn) error {
 
-	if err := o.Get(ID); err != nil {
+	if err := o.First(conn, ID); err != nil {
 		return err
 	}
 
@@ -42,15 +42,15 @@ func PutHelper(r *http.Request, o TypeHelper, ID string) error {
 	}
 
 	// Save object
-	return o.Save()
+	return o.Update(conn)
 }
 
-func GetHelper(r *http.Request, o TypeHelper, ID string) error {
-	return o.Get(ID)
+func GetHelper(r *http.Request, o TypeHelper, ID uint, conn utils.Conn) error {
+	return o.First(conn, ID)
 }
 
-func GetAllHelper(r *http.Request, o SliceTypeHelper) error {
-	return o.GetAll()
+func GetAllHelper(r *http.Request, o SliceTypeHelper, conn utils.Conn) error {
+	return o.Find(conn)
 }
 
 func UnmarshalBody(r *http.Request, o interface{}) error {
